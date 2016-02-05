@@ -11,6 +11,7 @@
     'category': 'sale',
     'depends': [
         'sale',
+        'product_pricelist',
     ],
     'website': 'http://www.akretion.com/',
     'data': [
