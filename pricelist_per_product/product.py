@@ -38,11 +38,15 @@ class ProductTemplate(models.Model):
             res.append(self.get_default_pricelist_item_vals(version))
         return res
 
+    '''
+    Disable custom pricelist creation during product create
     @api.model
     def create(self, vals):
+
         if 'pricelist_item_ids' in vals:
             self.create_or_write_pricelist(vals['pricelist_item_ids'])
         return super(ProductTemplate, self).create(vals)
+    '''
 
     @api.multi
     def write(self, vals):
@@ -62,6 +66,8 @@ class ProductTemplate(models.Model):
         vals.update({
             'price_discount': -1,
             'sequence': 1,
-            'base': 1,
+            # Remove base price update
+            # keep the default one
+            # 'base': 1,
         })
         return True

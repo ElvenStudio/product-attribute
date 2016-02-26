@@ -97,6 +97,8 @@ class ProductPricelistItem(models.Model):
             vals.update({
                 'price_discount': -1,
                 'sequence': 1,
-                'base': 1,
+                # Remove base price update
+                # keep the default one
+                # 'base': 1,
             })
         return super(ProductPricelistItem, self).create(vals)
