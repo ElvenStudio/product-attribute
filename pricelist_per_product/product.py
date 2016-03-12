@@ -15,7 +15,7 @@ class ProductTemplate(models.Model):
         'product.pricelist.item',
         'product_tmpl_id',
         string='Pricelist Items',
-        default=_default_pricelist_item_ids,
+        # default=_default_pricelist_item_ids,
         help="These prices are defined with absolute values\n"
              "(no calculation with discount)"
     )
