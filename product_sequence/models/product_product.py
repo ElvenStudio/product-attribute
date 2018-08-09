@@ -22,7 +22,6 @@
 from openerp import models, fields, api
 from openerp.tools.translate import _
 
-
 def update_null_and_slash_codes(cr):  # pragma: no cover
     """
     Updates existing codes matching the default '/' or
@@ -34,6 +33,24 @@ def update_null_and_slash_codes(cr):  # pragma: no cover
     cr.execute("UPDATE product_product "
                "SET default_code = '!!mig!!' || id "
                "WHERE default_code IS NULL OR default_code = '/';")
+
+
+class ProductTemplate(models.Model):
+    _inherit = 'product.template'
+
+    default_code = fields.Char(
+        string='Reference',
+        size=64,
+        select=True,
+        required=True,
+        default='/')
+
+    @api.model
+    def create(self, vals):
+        if 'default_code' in vals and vals['default_code'] == '/':
+            del vals['default_code']
+
+        return super(ProductTemplate, self).create(vals)
 
 
 class ProductProduct(models.Model):
@@ -54,9 +71,10 @@ class ProductProduct(models.Model):
 
     @api.model
     def create(self, vals):
+
         if 'default_code' not in vals or vals['default_code'] == '/':
-            vals['default_code'] = self.env['ir.sequence'].get(
-                'product.product')
+            vals['default_code'] = self.env['ir.sequence'].get('product.product')
+
         return super(ProductProduct, self).create(vals)
 
     @api.multi
@@ -68,13 +86,14 @@ class ProductProduct(models.Model):
             super(ProductProduct, product).write(vals)
         return True
 
-    @api.one
+    @api.multi
     def copy(self, default=None):
         if default is None:
             default = {}
         if self.default_code:
             default.update({
-                'default_code': self.default_code + _('-copy'),
+                # 'default_code': self.default_code + _('-copy'),
+                'default_code': '/',
             })
 
         return super(ProductProduct, self).copy(default)
