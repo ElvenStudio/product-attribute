@@ -30,13 +30,14 @@
 # Product Brand is an Openobject module wich enable Brand management for      #
 # products                                                                    #
 ###############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 
 
 class ProductBrand(models.Model):
     _name = 'product.brand'
 
     name = fields.Char('Brand Name', required=True)
+    code = fields.Char('Brand Code', required=True)
     description = fields.Text('Description', translate=True)
     partner_id = fields.Many2one(
         'res.partner',
@@ -55,10 +56,30 @@ class ProductBrand(models.Model):
         compute='_get_products_count',
     )
 
+    _sql_constraints = [
+        ('unique_code', 'unique (code)', _('Brand code must be unique!'))
+    ]
+
+    @api.model
+    def _get_code_from_name(self, name):
+        return name.lower().replace(' ', '_').replace('-', '_')
+
+    @api.one
+    @api.onchange('name')
+    def onchange_name(self):
+        self.code = self._get_code_from_name(self.name or '')
+
     @api.one
     @api.depends('product_ids')
     def _get_products_count(self):
         self.products_count = len(self.product_ids)
+
+    @api.model
+    def create(self, vals):
+        if 'code' not in vals:
+            vals['code'] = self._get_code_from_name(vals['name'])
+
+        return super(ProductBrand, self).create(vals)
 
 
 class ProductTemplate(models.Model):
