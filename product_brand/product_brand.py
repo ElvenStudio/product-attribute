@@ -37,7 +37,14 @@ class ProductBrand(models.Model):
     _name = 'product.brand'
 
     name = fields.Char('Brand Name', required=True)
-    code = fields.Char('Brand Code', required=True)
+    code = fields.Char(
+        string=_('Brand Code'),
+        compute='_compute_code',
+        store=True,
+        index=True,
+        readonly=True
+    )
+
     description = fields.Text('Description', translate=True)
     partner_id = fields.Many2one(
         'res.partner',
@@ -60,26 +67,15 @@ class ProductBrand(models.Model):
         ('unique_code', 'unique (code)', _('Brand code must be unique!'))
     ]
 
-    @api.model
-    def _get_code_from_name(self, name):
-        return name.lower().replace(' ', '_').replace('-', '_')
-
     @api.one
-    @api.onchange('name')
-    def onchange_name(self):
-        self.code = self._get_code_from_name(self.name or '')
+    @api.depends('name')
+    def _compute_code(self):
+        self.code = filter(str.isalnum, str((self.name or '').lower()))
 
     @api.one
     @api.depends('product_ids')
     def _get_products_count(self):
         self.products_count = len(self.product_ids)
-
-    @api.model
-    def create(self, vals):
-        if 'code' not in vals:
-            vals['code'] = self._get_code_from_name(vals['name'])
-
-        return super(ProductBrand, self).create(vals)
 
 
 class ProductTemplate(models.Model):
