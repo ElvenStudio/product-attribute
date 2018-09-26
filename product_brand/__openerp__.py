@@ -38,6 +38,7 @@
     'license': 'AGPL-3',
     'depends': ['product'],
     'data': [
+        'data/data.xml',
         'product_brand_view.xml',
         'security/ir.model.access.csv'
     ],
